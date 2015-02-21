@@ -118,8 +118,94 @@
     </script>
     <script type="demo">
       // console.log('demo here', window.a, b, window.c, window.g);
-      var imgData = c.getImageData(0, 0, a.width, a.height);
-      console.log(imgData)
+      var imgData = c.getImageData(0, 0, a.width, a.height),
+          data = imgData.data,
+          newPixel,
+          x,
+          y;
+
+      var getPixel = function(x, y) {
+        // new bit
+        var o = [0,0,0],
+          c = [0,0,w],
+          l = [x-w,y-h,W].unit(),
+          r = w,
+          D = o.add(c.scale(-1)),
+          l_dot_D = l.dot(D),
+          d = -l_dot_D-S(l_dot_D * l_dot_D - D.dot(D) + r*r);
+
+        if ( isNaN(d) ) {
+          return [255, 0,0];
+        } else {
+          return [0,255,0]
+        }
+      }
+      
+      // compressed version of vector methods      
+      // A=Array.prototype;S=Math.sqrt;A.a=function(x){t=this;return [t[0]+x[0],t[1]+x[1],t[2]+x[2]]}A.s=function(x){t=this;return [t[0]*x,t[1]*x,t[2]*x]}A.d=function(x){t=this;return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]}A.c=function(x){t=this;return [t[1]*x[2]-t[2]*x[y],t[2]*x[0]-t[0]*x[2],t[0]*x[1]-t[1]*x[0]]}A.m=function(){t=this;return S(t[0]*t[0]+t[1]*t[1]+t[2]*t[2])}A.u=function(){t=this;return t.s(1/t.m())}
+
+      // Extend array prototype with some vector operations
+      A = Array.prototype;
+      S = Math.sqrt;
+
+      A.add = function(x) {
+        t=this;
+        return [t[0]+x[0],t[1]+x[1],t[2]+x[2]]
+      }
+
+      A.scale = function(x) {
+        t=this;
+        return [t[0]*x,t[1]*x,t[2]*x]
+      }
+
+      A.dot = function(x) {
+        t=this;
+        return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]
+      }
+
+      A.cross = function(x) {
+        t=this;
+        return [t[1]*x[2]-t[2]*x[y], t[2]*x[0]-t[0]*x[2], t[0]*x[1]-t[1]*x[0]];
+      }
+
+      A.magnitude = function() { 
+        t=this;
+        return S(t[0]*t[0]+t[1]*t[1]+t[2]*t[2]);
+      }
+
+      A.unit = function() {
+        t=this;return t.scale(1/t.magnitude());
+      }
+
+      // Camera at [0,0,0]
+      // Image plane at [0, 0, image.width] (i.e. focal length = image width)
+      // => vector for a ray at pixel (x,y) will be [x, y, image.width]
+
+      // line plane intersection
+      // d=(p0-l0).n/(l.n)
+      // intersects at: dl+l0
+      // l0 = [0,0,0]; n
+
+      W = imgData.width;
+      H = imgData.height;
+      w = W/2;
+      h = H/2;
+
+      L = W * H * 4;
+
+      for (var i = 0; i < L; i+=4) {
+        x = (i / 4) % W;
+        y = Math.floor((i / 4) / H);
+
+        newPixel = getPixel(x, y);
+
+        data[i] = newPixel[0];
+        data[i + 1] = newPixel[1];
+        data[i + 2] = newPixel[2];
+        data[i + 3] = 255;
+      }
+
+      c.putImageData(imgData, 0, 0);
 
     </script>
     <script>
