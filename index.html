@@ -127,7 +127,7 @@
       var getPixel = function(x, y) {
         // new bit
         var o = [0,0,0],
-          c = [0,0,w],
+          c = [0,0,9*w],
           l = [x-w,y-h,W].unit(),
           r = w,
           D = o.add(c.scale(-1)),
@@ -137,7 +137,8 @@
         if ( isNaN(d) ) {
           return [255, 0,0];
         } else {
-          return [0,255,0]
+          var x = 255*(d-8*w)/w;
+          return [x,x,x]
         }
       }
       
