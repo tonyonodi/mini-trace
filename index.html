@@ -128,7 +128,7 @@
         // new bit
         var o = [0,0,0],
           c = [0,0,9*w],
-          l = [x-w,(y-w)*(h/w),W].unit(),
+          l = [x-w,h*y/w-h,W].unit(),
           r = w,
           D = o.add(c.scale(-1)),
           l_dot_D = l.dot(D),
