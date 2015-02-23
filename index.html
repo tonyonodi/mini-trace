@@ -168,22 +168,29 @@
         // d=(p0-l0).n/(l.n)
         // intersects at: dl+l0
         // l0 = [0,0,0];
+        flag = 0
 
-        var sphereColision = function(x, y, sphere) {
-          var o = [0,0,0],
-            c = [0,0,9*w],
-            l = [x-w,h*y/w-h,W/3].unit(),
-            r = w,
-            D = o.add(c.scale(-1)),
-            l_dot_D = l.dot(D),
-            d = -l_dot_D-S(l_dot_D * l_dot_D - D.dot(D) + r*r);
+        var sphereColision = function(centre, line, point) {
+          var r = w,
+            D = point.add(centre.scale(-1)),
+            l_dot_D = line.dot(D),
+            d = -l_dot_D-S(l_dot_D * l_dot_D - D.dot(D) + r*r),
+            newPoint = line.unit().scale(d).add(point),
+            normalToSphere = centre.add(newPoint.scale(-1)); // center - newPoint;
 
-          if ( isNaN(d) ) {
-            var angle = 255*l.dot([0,-1,0])|0;
-            return [angle, 0,0];
-          } else {
+          // check if vector between point and newPoint is in direction of line
+          // i.e. whether the point of intersection is infront of vector or behind
+          // is newPoint - point equal to line
+
+          if (isNaN(d)||d<=0) { // ray misses sphere or sphere is behind origin
+            var angle = 255*line.dot([0,-1,0])|0;
+            if(angle>0)
+              return [angle, 0,0];
+            else
+              return [0,255,0]
+          } else {            // ray hits sphere
             var x = 255*(d-8*w)/w;
-            return [x,x,255]
+            return sphereColision(centre, newLine, newPoint);
           }
         }
 
@@ -209,7 +216,7 @@
           x = (i / 4) % W;
           y = Math.floor((i / 4) / H);
 
-          newPixel = sphereColision(x, y);
+          newPixel = sphereColision([0,0,9*w], [x-w,h*y/w-h,W/3].unit(), [0,0,0]);
 
           data[i] = newPixel[0];
           data[i + 1] = newPixel[1];
