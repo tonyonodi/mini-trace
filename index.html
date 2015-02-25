@@ -168,7 +168,7 @@
         // d=(p0-l0).n/(l.n)
         // intersects at: dl+l0
         // l0 = [0,0,0];
-        flag = 0
+        flag=0;
 
         var sphereColision = function(centre, line, point) {
           var r = w,
@@ -176,7 +176,8 @@
             l_dot_D = line.dot(D),
             d = -l_dot_D-S(l_dot_D * l_dot_D - D.dot(D) + r*r),
             newPoint = line.unit().scale(d).add(point),
-            normalToSphere = centre.add(newPoint.scale(-1)); // center - newPoint;
+            normalToSphere = centre.add(newPoint.scale(-1)).unit(),  // center - newPoint;
+            lineToLight = lightPosition.add(newPoint.scale(-1)).unit(); // collision to light source
 
           // check if vector between point and newPoint is in direction of line
           // i.e. whether the point of intersection is infront of vector or behind
@@ -189,8 +190,10 @@
             else
               return [0,255,0]
           } else {            // ray hits sphere
-            var x = 255*(d-8*w)/w;
-            return sphereColision(centre, newLine, newPoint);
+            var x = 255*(d-8*w)/w,
+              b = normalToSphere.dot(lineToLight);
+              b = Math.pow(b+1,8);
+            return [b,b,b];
           }
         }
 
@@ -209,6 +212,7 @@
         H = imgData.height;
         w = W/2;
         h = H/2;
+        lightPosition = [9*W,0,19*W]
 
         L = W * H * 4;
 
