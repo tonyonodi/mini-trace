@@ -191,9 +191,17 @@
               return [0,255,0]
           } else {            // ray hits sphere
             var x = 255*(d-8*w)/w,
-              b = normalToSphere.dot(lineToLight);
-              b = Math.pow(b+1,8);
-            return [b,b,b];
+              k = [5,5,20],
+              diffuse = [100,100,200].scale(normalToSphere.dot(lineToLight)),
+              ambient = k.scale(2);
+              lineToLight_plus_line = lineToLight.add(line);
+              specular = [100,100,100].scale(Math.pow(normalToSphere.dot(lineToLight_plus_line.scale(1/lineToLight_plus_line.magnitude())), 20));
+              if (flag < 10 && specular > 0) {
+                console.log(specular);
+                flag += 1;
+              }
+              intensity = ambient.add(diffuse).add(specular);
+            return intensity;
           }
         }
 
@@ -212,7 +220,7 @@
         H = imgData.height;
         w = W/2;
         h = H/2;
-        lightPosition = [9*W,0,19*W]
+        lightPosition = [4*W,10*w,15*W]
 
         L = W * H * 4;
 
@@ -220,7 +228,7 @@
           x = (i / 4) % W;
           y = Math.floor((i / 4) / H);
 
-          newPixel = sphereColision([0,0,9*w], [x-w,h*y/w-h,W/3].unit(), [0,0,0]);
+          newPixel = sphereColision([0,0,2*w], [x-w,h*y/w-h,W/3].unit(), [0,0,0]);
 
           data[i] = newPixel[0];
           data[i + 1] = newPixel[1];
