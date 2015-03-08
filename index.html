@@ -164,80 +164,78 @@
         // Image plane at [0, 0, image.width] (i.e. focal length = image width)
         // => vector for a ray at pixel (x,y) will be [x, y, image.width]
 
+        var sphereColGenerator = function(centre) {
+          return function(line, point) {
+            var r = w,
+              D = point.add(centre.scale(-1)),
+              l_dot_D = line.dot(D),
+              d = -l_dot_D-S(l_dot_D * l_dot_D - D.dot(D) + r*r),
+              newPoint = line.unit().scale(d).add(point),
+              normalToSphere = centre.add(newPoint.scale(-1)).unit(),  // center - newPoint;
+              lineToLight = lightPosition.add(newPoint.scale(-1)).unit(); // collision to light source
+
+            // check if vector between point and newPoint is in direction of line
+            // i.e. whether the point of intersection is infront of vector or behind
+            // is newPoint - point equal to line
+
+            if (isNaN(d)||d<=0) // ray misses sphere or sphere is behind origin
+              return null;
+
+              // ray hits sphere
+              var x = 255*(d-8*w)/w,
+                ambient = [20,20,80].scale(2);
+                diffuse = [100,100,200].scale(normalToSphere.dot(lineToLight)),
+                lineToLight_plus_line = lineToLight.add(line);
+                specular = [100,100,100].scale(Math.pow(normalToSphere.dot(lineToLight_plus_line.scale(1/lineToLight_plus_line.magnitude())), 50));
+                intensity = ambient.add(diffuse).add(specular);
+              return intensity;
+          }
+        }
+
         // line plane intersection
         // d=(p0-l0).n/(l.n)
         // intersects at: dl+l0
         // l0 = [0,0,0];
-        flag=0;
 
-        var sphereColision = function(centre, line, point) {
-          var r = w,
-            D = point.add(centre.scale(-1)),
-            l_dot_D = line.dot(D),
-            d = -l_dot_D-S(l_dot_D * l_dot_D - D.dot(D) + r*r),
-            newPoint = line.unit().scale(d).add(point),
-            normalToSphere = centre.add(newPoint.scale(-1)).unit(),  // center - newPoint;
-            lineToLight = lightPosition.add(newPoint.scale(-1)).unit(); // collision to light source
+        // point on RH wall is (2,0,8)
+        // normal to plane is (1,0,0)
+        var rightWallCollision = function(line, point) {
+          var normal = [1,0,0],
+            pointOnPlane = [2*W,0,0],
+            d = pointOnPlane.add(point.scale(-1)).dot(normal)/line.dot(normal);
 
-          // check if vector between point and newPoint is in direction of line
-          // i.e. whether the point of intersection is infront of vector or behind
-          // is newPoint - point equal to line
-
-          if (isNaN(d)||d<=0) { // ray misses sphere or sphere is behind origin
-            var angle = 255*line.dot([0,-1,0])|0;
-            if(angle>0)
-              return [angle, 0,0];
-            else
-              return [0,255,0]
-          } else {            // ray hits sphere
-            var x = 255*(d-8*w)/w,
-              diffuse = [100,100,200].scale(normalToSphere.dot(lineToLight)),
-              ambient = [5,5,20].scale(2);
-              lineToLight_plus_line = lineToLight.add(line);
-              specular = [100,100,100].scale(Math.pow(normalToSphere.dot(lineToLight_plus_line.scale(1/lineToLight_plus_line.magnitude())), 50));
-              if (flag < 10 && specular > 0) {
-                console.log(specular);
-                flag += 1;
-              }
-              intensity = ambient.add(diffuse).add(specular);
-            return intensity;
+          if (d > 0) {
+            var intersection = line.scale(d);
+            if (-W < intersection[1] && W > intersection[1] && intersection[2] < 12*W)
+              return [255,0,0];
           }
         }
 
-        // var planeCollision = function(x,y) {
-        //   var p = [0,-2*w,0],
-        //     l = [0,0,0],
-        //     n = [0,1,0],
-        //     numerator = p.add(l.scale(-1)).dot(n),
-        //     denominator = l.dot(n),
-        //     d = numerator/denominator;
-
-        //   return [d,1,1]
-        // }
+        // point on LH wall is (-2,0,8)
 
         W = imgData.width;
         H = imgData.height;
         w = W/2;
         h = H/2;
-        lightPosition = [40*W,40*w,40*W]
+        lightPosition = [0,9*W,0];
 
         L = W * H * 4;
-        distance = 2*w;
-        while(distance < 3*w) {
-          for (var i = 0; i < L; i+=4) {
-            x = (i / 4) % W;
-            y = Math.floor((i / 4) / H);
+        for (var i = 0; i < L; i+=4) {
+          x = (i / 4) % W;
+          y = Math.floor((i / 4) / H);
+          rayDir = [x-w,h*y/w-h,2*W].unit();
 
-            newPixel = sphereColision([0,0,distance], [x-w,h*y/w-h,W/3].unit(), [0,0,0]);
-          
-            data[i] = newPixel[0];
-            data[i + 1] = newPixel[1];
-            data[i + 2] = newPixel[2];
-            data[i + 3] = 255;
-          }
-          c.putImageData(imgData, 0, 0);
-          distance += w;
+          sphere1 = sphereColGenerator([-1*W,0,8*W]);
+          sphere2 = sphereColGenerator([1.5*W,0,10*W]);
+
+          newPixel = /*sphere1(rayDir, [0,0,0]) || sphere2(rayDir, [0,0,0]) ||*/ rightWallCollision(rayDir, [0,0,0]) || [0,0,0];
+        
+          data[i] = newPixel[0];
+          data[i + 1] = newPixel[1];
+          data[i + 2] = newPixel[2];
+          data[i + 3] = 255;
         }
+        c.putImageData(imgData, 0, 0);
 
       </script>
       <script>
