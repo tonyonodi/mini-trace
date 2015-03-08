@@ -191,11 +191,10 @@
               return [0,255,0]
           } else {            // ray hits sphere
             var x = 255*(d-8*w)/w,
-              k = [5,5,20],
               diffuse = [100,100,200].scale(normalToSphere.dot(lineToLight)),
-              ambient = k.scale(2);
+              ambient = [5,5,20].scale(2);
               lineToLight_plus_line = lineToLight.add(line);
-              specular = [100,100,100].scale(Math.pow(normalToSphere.dot(lineToLight_plus_line.scale(1/lineToLight_plus_line.magnitude())), 20));
+              specular = [100,100,100].scale(Math.pow(normalToSphere.dot(lineToLight_plus_line.scale(1/lineToLight_plus_line.magnitude())), 50));
               if (flag < 10 && specular > 0) {
                 console.log(specular);
                 flag += 1;
@@ -220,23 +219,25 @@
         H = imgData.height;
         w = W/2;
         h = H/2;
-        lightPosition = [4*W,10*w,15*W]
+        lightPosition = [40*W,40*w,40*W]
 
         L = W * H * 4;
+        distance = 2*w;
+        while(distance < 3*w) {
+          for (var i = 0; i < L; i+=4) {
+            x = (i / 4) % W;
+            y = Math.floor((i / 4) / H);
 
-        for (var i = 0; i < L; i+=4) {
-          x = (i / 4) % W;
-          y = Math.floor((i / 4) / H);
-
-          newPixel = sphereColision([0,0,2*w], [x-w,h*y/w-h,W/3].unit(), [0,0,0]);
-
-          data[i] = newPixel[0];
-          data[i + 1] = newPixel[1];
-          data[i + 2] = newPixel[2];
-          data[i + 3] = 255;
+            newPixel = sphereColision([0,0,distance], [x-w,h*y/w-h,W/3].unit(), [0,0,0]);
+          
+            data[i] = newPixel[0];
+            data[i + 1] = newPixel[1];
+            data[i + 2] = newPixel[2];
+            data[i + 3] = 255;
+          }
+          c.putImageData(imgData, 0, 0);
+          distance += w;
         }
-
-        c.putImageData(imgData, 0, 0);
 
       </script>
       <script>
