@@ -197,21 +197,17 @@
         // intersects at: dl+l0
         // l0 = [0,0,0];
 
-        // point on RH wall is (2,0,8)
-        // normal to plane is (1,0,0)
-        var rightWallCollision = function(line, point) {
-          var normal = [1,0,0],
-            pointOnPlane = [2*W,0,0],
-            d = pointOnPlane.add(point.scale(-1)).dot(normal)/line.dot(normal);
+        var wallColGenerator = function(colour, normal, pointOnPlane) {
+          return function(line, point) {
+            var d = pointOnPlane.add(point.scale(-1)).dot(normal)/line.dot(normal);
 
-          if (d > 0) {
-            var intersection = line.scale(d);
-            if (-W < intersection[1] && W > intersection[1] && intersection[2] < 12*W)
-              return [255,0,0];
+            if (d > 0) {
+              var intersection = line.scale(d);
+              if (-W < intersection[1] && W > intersection[1] && intersection[2] < 12*W)
+                return colour;
+            }
           }
         }
-
-        // point on LH wall is (-2,0,8)
 
         W = imgData.width;
         H = imgData.height;
@@ -227,8 +223,10 @@
 
           sphere1 = sphereColGenerator([-1*W,0,8*W]);
           sphere2 = sphereColGenerator([1.5*W,0,10*W]);
+          leftWall = wallColGenerator([0,255,0], [1,0,0], [-2*W,0,0]);
+          rightWall = wallColGenerator([255,0,0], [1,0,0], [2*W,0,0]);
 
-          newPixel = /*sphere1(rayDir, [0,0,0]) || sphere2(rayDir, [0,0,0]) ||*/ rightWallCollision(rayDir, [0,0,0]) || [0,0,0];
+          newPixel = /*sphere1(rayDir, [0,0,0]) || sphere2(rayDir, [0,0,0]) ||*/ leftWall(rayDir, [0,0,0]) || rightWall(rayDir, [0,0,0]) || [0,0,0];
         
           data[i] = newPixel[0];
           data[i + 1] = newPixel[1];
