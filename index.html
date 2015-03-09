@@ -197,14 +197,18 @@
         // intersects at: dl+l0
         // l0 = [0,0,0];
 
-        var wallColGenerator = function(colour, normal, pointOnPlane) {
+        var wallColGenerator = function(ambient, normal, pointOnPlane) {
           return function(line, point) {
             var d = pointOnPlane.add(point.scale(-1)).dot(normal)/line.dot(normal);
 
             if (d > 0) {
-              var intersection = line.scale(d);
-              if (-1.5*W < intersection[1] && 1.5*W > intersection[1] && intersection[2] < 12*W)
-                return colour;
+              var intersection = line.scale(d),
+                pathToLight = lightPosition.add(intersection.scale(-1));
+              if (-1.5*W < intersection[1] && 1.5*W > intersection[1] && intersection[2] < 12*W) {
+                var noShadow = null != (sphere1(pathToLight, intersection) || sphere2(pathToLight, intersection)),
+                  diffuse = [100,100,100].scale(noShadow);
+                return ambient.add(diffuse);
+              }
             }
           }
         }
@@ -218,11 +222,11 @@
 
         sphere1 = sphereColGenerator([-1*W,0,8*W]);
         sphere2 = sphereColGenerator([1.5*W,0,10*W]);
-        leftWall = wallColGenerator([0,255,0], [1,0,0], [-2*W,0,0]);
-        rightWall = wallColGenerator([255,0,0], [1,0,0], [2*W,0,0]);
-        floor = wallColGenerator([200,200,200], [0,1,0], [0,1.49*W,0]);
-        ceiling = wallColGenerator([200,200,200], [0,1,0], [0,-1.49*W,0]);
-        backWall = wallColGenerator([0,0,255], [0,0,1], [0,0,11.99*W]);
+        leftWall = wallColGenerator([0,173,0], [1,0,0], [-2*W,0,0]);
+        rightWall = wallColGenerator([173,0,0], [1,0,0], [2*W,0,0]);
+        floor = wallColGenerator([100,100,100], [0,1,0], [0,1.49*W,0]);
+        ceiling = wallColGenerator([100,100,100], [0,1,0], [0,-1.49*W,0]);
+        backWall = wallColGenerator([0,0,173], [0,0,1], [0,0,11.99*W]);
 
         L = W * H * 4;
 
