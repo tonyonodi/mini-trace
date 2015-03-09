@@ -160,7 +160,7 @@
           t=this;return t.scale(1/t.magnitude());
         }
 
-        // Camera at [0,0,0]
+        // Camera at O
         // Image plane at [0, 0, image.width] (i.e. focal length = image width)
         // => vector for a ray at pixel (x,y) will be [x, y, image.width]
 
@@ -203,7 +203,7 @@
 
             if (d > 0) {
               var intersection = line.scale(d);
-              if (-W < intersection[1] && W > intersection[1] && intersection[2] < 12*W)
+              if (-1.5*W < intersection[1] && 1.5*W > intersection[1] && intersection[2] < 12*W)
                 return colour;
             }
           }
@@ -213,30 +213,33 @@
         H = imgData.height;
         w = W/2;
         h = H/2;
-        lightPosition = [0,9*W,0];
+        O = [0,0,0];
+        lightPosition = [0,0,9*W];
 
         sphere1 = sphereColGenerator([-1*W,0,8*W]);
         sphere2 = sphereColGenerator([1.5*W,0,10*W]);
         leftWall = wallColGenerator([0,255,0], [1,0,0], [-2*W,0,0]);
         rightWall = wallColGenerator([255,0,0], [1,0,0], [2*W,0,0]);
-        floor = wallColGenerator([200,200,200], [0,1,0], [0,0.99*W,0]);
-        ceiling = wallColGenerator([200,200,200], [0,1,0], [0,-0.99*W,0]);
+        floor = wallColGenerator([200,200,200], [0,1,0], [0,1.49*W,0]);
+        ceiling = wallColGenerator([200,200,200], [0,1,0], [0,-1.49*W,0]);
         backWall = wallColGenerator([0,0,255], [0,0,1], [0,0,11.99*W]);
 
         L = W * H * 4;
+
+        // loop over pixels
         for (var i = 0; i < L; i+=4) {
           x = (i / 4) % W;
           y = Math.floor((i / 4) / H);
           rayDir = [x-w,h*y/w-h,2*W].unit();
 
-          newPixel = /*sphere1(rayDir, [0,0,0]) || 
-            sphere2(rayDir, [0,0,0]) ||*/ 
-            leftWall(rayDir, [0,0,0]) || 
-            rightWall(rayDir, [0,0,0]) || 
-            floor(rayDir, [0,0,0]) || 
-            ceiling(rayDir, [0,0,0]) || 
-            backWall(rayDir, [0,0,0]) || 
-            [0,0,0];
+          newPixel = sphere1(rayDir, O) || 
+            sphere2(rayDir, O) ||
+            leftWall(rayDir, O) || 
+            rightWall(rayDir, O) || 
+            floor(rayDir, O) || 
+            ceiling(rayDir, O) || 
+            backWall(rayDir, O) || 
+            O;
         
           data[i] = newPixel[0];
           data[i + 1] = newPixel[1];
