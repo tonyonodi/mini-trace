@@ -144,7 +144,7 @@
         A.subtract = function(x) {
           return this.add(x.scale(-1))
         }
-        
+
         A.dot = function(x) {
           t=this;
           return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]
@@ -192,10 +192,10 @@
         var wallColGenerator = function(ambient, normal, pointOnPlane) {
           // return intersection distance if hit
           return function(line, point) {
-            var d = pointOnPlane.add(point.scale(-1)).dot(normal)/line.dot(normal);
+            var d = pointOnPlane.subtract(point).dot(normal) / line.dot(normal);
 
             if (d > 0) {
-              var intersection = line.scale(d);
+              var intersection = point.add(line.scale(d));
               if (-1.5*W < intersection[1] && 1.5*W > intersection[1] && intersection[2] < 12*W)
                 return intersection;
             }
