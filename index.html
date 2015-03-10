@@ -170,25 +170,11 @@
               D = point.add(centre.scale(-1)),
               l_dot_D = line.dot(D),
               d = -l_dot_D-S(l_dot_D * l_dot_D - D.dot(D) + r*r),
-              newPoint = line.unit().scale(d).add(point),
-              normalToSphere = centre.add(newPoint.scale(-1)).unit(),  // center - newPoint;
-              lineToLight = lightPosition.add(newPoint.scale(-1)).unit(); // collision to light source
-
-            // check if vector between point and newPoint is in direction of line
-            // i.e. whether the point of intersection is infront of vector or behind
-            // is newPoint - point equal to line
+              intersection = line.scale(d).add(point);
 
             if (isNaN(d)||d<=0) // ray misses sphere or sphere is behind origin
               return null;
-
-              // ray hits sphere
-              var x = 255*(d-8*w)/w,
-                ambient = [20,20,80].scale(2);
-                diffuse = [100,100,200].scale(normalToSphere.dot(lineToLight)),
-                lineToLight_plus_line = lineToLight.add(line);
-                specular = [100,100,100].scale(Math.pow(normalToSphere.dot(lineToLight_plus_line.scale(1/lineToLight_plus_line.magnitude())), 50));
-                intensity = ambient.add(diffuse).add(specular);
-              return intensity;
+            return true;              
           }
         }
 
@@ -205,9 +191,7 @@
               var intersection = line.scale(d),
                 pathToLight = lightPosition.add(intersection.scale(-1));
               if (-1.5*W < intersection[1] && 1.5*W > intersection[1] && intersection[2] < 12*W) {
-                var noShadow = null != (sphere1(pathToLight, intersection) || sphere2(pathToLight, intersection)),
-                  diffuse = [100,100,100].scale(noShadow);
-                return ambient.add(diffuse);
+                return true
               }
             }
           }
@@ -228,7 +212,31 @@
         ceiling = wallColGenerator([100,100,100], [0,1,0], [0,-1.49*W,0]);
         backWall = wallColGenerator([0,0,173], [0,0,1], [0,0,11.99*W]);
 
+        colFuncArray = [backWall, ceiling, floor, rightWall, leftWall, sphere2, sphere1];
+        colourArray = [
+          [255,0,0],
+          [0,255,0],
+          [0,0,255],
+          [255,100,0],
+          [255,0,255],
+          [255,255,0],
+          [255,255,255]
+        ];
+
         L = W * H * 4;
+
+        var trace = function(direction, point) {
+          // loop over collision functions
+          for(q=7;q--;){
+            if (colFuncArray[q](direction,point)) {
+              return q
+            }
+          }
+        }
+
+        var sample = function(direction, point) {
+          return colourArray[trace(direction, point)];
+        }
 
         // loop over pixels
         for (var i = 0; i < L; i+=4) {
@@ -236,14 +244,7 @@
           y = Math.floor((i / 4) / H);
           rayDir = [x-w,h*y/w-h,2*W].unit();
 
-          newPixel = sphere1(rayDir, O) || 
-            sphere2(rayDir, O) ||
-            leftWall(rayDir, O) || 
-            rightWall(rayDir, O) || 
-            floor(rayDir, O) || 
-            ceiling(rayDir, O) || 
-            backWall(rayDir, O) || 
-            O;
+          newPixel = sample(rayDir, [0,0,0]);
         
           data[i] = newPixel[0];
           data[i + 1] = newPixel[1];
