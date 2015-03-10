@@ -164,7 +164,9 @@
         // Image plane at [0, 0, image.width] (i.e. focal length = image width)
         // => vector for a ray at pixel (x,y) will be [x, y, image.width]
 
+        // return sphere collision detection func
         var sphereColGenerator = function(centre) {
+          // return intersection distance if hit
           return function(line, point) {
             var r = w,
               D = point.add(centre.scale(-1)),
@@ -172,9 +174,8 @@
               d = -l_dot_D-S(l_dot_D * l_dot_D - D.dot(D) + r*r),
               intersection = line.scale(d).add(point);
 
-            if (isNaN(d)||d<=0) // ray misses sphere or sphere is behind origin
-              return null;
-            return true;              
+            if (!isNaN(d)||d>0) // ray misses sphere or sphere is behind origin
+              return intersection
           }
         }
 
@@ -183,16 +184,16 @@
         // intersects at: dl+l0
         // l0 = [0,0,0];
 
+        // return wall collision detection func
         var wallColGenerator = function(ambient, normal, pointOnPlane) {
+          // return intersection distance if hit
           return function(line, point) {
             var d = pointOnPlane.add(point.scale(-1)).dot(normal)/line.dot(normal);
 
             if (d > 0) {
-              var intersection = line.scale(d),
-                pathToLight = lightPosition.add(intersection.scale(-1));
-              if (-1.5*W < intersection[1] && 1.5*W > intersection[1] && intersection[2] < 12*W) {
-                return true
-              }
+              var intersection = line.scale(d);
+              if (-1.5*W < intersection[1] && 1.5*W > intersection[1] && intersection[2] < 12*W)
+                return intersection;
             }
           }
         }
@@ -224,18 +225,19 @@
         ];
 
         L = W * H * 4;
-
+        
+        // return [intersection, object] where object is given by:
+        // 0 => backWall, 1 => ceiling, 2 => floor, 3 => rightWall, 4 => leftWall, 5 => sphere2, 6 => sphere1
         var trace = function(direction, point) {
-          // loop over collision functions
           for(q=7;q--;){
-            if (colFuncArray[q](direction,point)) {
-              return q
-            }
+            var intersection = colFuncArray[q](direction,point);
+            if (intersection)
+              return [intersection, q]
           }
         }
 
         var sample = function(direction, point) {
-          return colourArray[trace(direction, point)];
+          return colourArray[trace(direction, point)[1]];
         }
 
         // loop over pixels
