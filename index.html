@@ -189,8 +189,8 @@
         // l0 = [0,0,0];
 
         // return wall collision detection func
-        var wallColGenerator = function(ambient, normal, pointOnPlane) {
-          return function(line, point) {
+        var wallColGenerator = function(colour, normal, pointOnPlane) {
+          var wallfunc = function(line, point) {
             var d = pointOnPlane.subtract(point).dot(normal) / line.dot(normal);
 
             if (d > 0) {
@@ -199,19 +199,21 @@
                 return intersection;
             }
           }
+          wallfunc.colour = colour;
+          return wallfunc;
         }
 
         var sphereColour = function(intersection) { // <- intersection can be removed if global
           return [255,0,0]
         }
 
-        var wallColour = function(intersection) { // <- intersection can be removed if global
+        var wallColour = function(intersection, wallItHit) { // <- intersection can be removed if global
           // calculate vector towards light
           var toLight = lightPosition.subtract(intersection),
             sphereHit = trace(toLight.unit(), intersection)[1] > 4,
             intensity = 100 + 75*!sphereHit;
 
-          return [intensity, intensity, intensity]
+          return colFuncArray[wallItHit].colour
         }
         
         // return [intersection, object] where object is given by:
@@ -232,7 +234,7 @@
             object = traced[1];
 
           if (object < 5)
-            return wallColour(intersection);
+            return wallColour(intersection, object);
           return sphereColour(intersection);
         }
 
@@ -250,6 +252,7 @@
         floor = wallColGenerator([100,100,100], [0,1,0], [0,1.49*W,0]);
         ceiling = wallColGenerator([100,100,100], [0,1,0], [0,-1.49*W,0]);
         backWall = wallColGenerator([0,0,173], [0,0,1], [0,0,11.99*W]);
+        console.log(leftWall.colour);
 
         colFuncArray = [backWall, ceiling, floor, rightWall, leftWall, sphere2, sphere1];
         L = W * H * 4;
