@@ -207,11 +207,11 @@
 
         var wallColour = function(intersection) { // <- intersection can be removed if global
           // calculate vector towards light
-          var toLight = lightPosition.subtract(intersection).unit(),
-            objectHit = trace(toLight, intersection)[1]; // trace path to light, detect collisions
-          if (objectHit == 6) // if sphere casts shadow show different colour
-            return [0,0,255]
-          return [0,255,0]
+          var toLight = lightPosition.subtract(intersection),
+            sphereHit = trace(toLight.unit(), intersection)[1] > 4,
+            intensity = 100 + 75*!sphereHit;
+
+          return [intensity, intensity, intensity]
         }
         
         // return [intersection, object] where object is given by:
@@ -241,10 +241,10 @@
         w = W/2;
         h = H/2;
         O = [0,0,0];
-        lightPosition = [0,0,5*W];
+        lightPosition = [-2*W,0,5*W];
 
-        sphere1 = sphereColGenerator([-1*W,0,8*W]);
-        sphere2 = sphereColGenerator([1.5*W,0,10*W]);
+        sphere1 = sphereColGenerator([-1*W,-1*W,10*W]);
+        sphere2 = sphereColGenerator([1.5*W,-1*W,10*W]);
         leftWall = wallColGenerator([0,173,0], [1,0,0], [-2*W,0,0]);
         rightWall = wallColGenerator([173,0,0], [1,0,0], [2*W,0,0]);
         floor = wallColGenerator([100,100,100], [0,1,0], [0,1.49*W,0]);
@@ -259,7 +259,7 @@
           var pixel = i/4;
           x = pixel % W;
           y = Math.floor(pixel / H);
-          rayDir = [x-w,h*y/w-h,2*W].unit();
+          rayDir = [x-w,-h*y/w+h,2*W].unit();
 
           newPixel = sample(rayDir, O);
         
