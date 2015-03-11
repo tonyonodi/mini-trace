@@ -207,9 +207,9 @@
 
         var wallColour = function(intersection) { // <- intersection can be removed if global
           // calculate vector towards light
-          var toLight = lightPosition.subtract(intersection),
+          var toLight = lightPosition.subtract(intersection).unit(),
             objectHit = trace(toLight, intersection)[1]; // trace path to light, detect collisions
-          if (objectHit == 5) // if sphere casts shadow show different colour
+          if (objectHit == 6) // if sphere casts shadow show different colour
             return [0,0,255]
           return [0,255,0]
         }
@@ -241,7 +241,7 @@
         w = W/2;
         h = H/2;
         O = [0,0,0];
-        lightPosition = [0,W,9*W];
+        lightPosition = [0,0,5*W];
 
         sphere1 = sphereColGenerator([-1*W,0,8*W]);
         sphere2 = sphereColGenerator([1.5*W,0,10*W]);
