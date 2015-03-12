@@ -171,16 +171,18 @@
         // return sphere collision detection func
         var sphereColGenerator = function(centre) {
           // return intersection distance if hit
-          return function(line, point) {
+          var spherefunc = function(line, point) {
             var r = w,
-              D = point.subtract(centre),
-              l_dot_D = line.dot(D),
-              d = -l_dot_D-S(l_dot_D * l_dot_D - D.dot(D) + r*r),
+              osubc = point.subtract(centre),
+              loc = line.dot(osubc),
+              d = loc - Math.sqrt(loc*loc - osubc.magnitude()*osubc.magnitude() + r*r),
               intersection = point.add(line.scale(d));
 
             if (!isNaN(d)||d>0) // ray misses sphere or sphere is behind origin
               return intersection
           }
+          spherefunc.centre = centre;
+          return spherefunc
         }
 
         // line plane intersection
@@ -203,15 +205,27 @@
           return wallfunc;
         }
 
-        var sphereColour = function(intersection) { // <- intersection can be removed if global
-          return [255,0,0]
+        var sphereColour = function(direction, intersection, sphereItHit) { // <- intersection can be removed if global
+          var normal =  intersection.subtract(colFuncArray[sphereItHit].centre).unit(),
+            reflection = direction.subtract(normal.scale(2*direction.dot(normal))),
+            traced = trace(reflection, intersection.add(normal.scale(10)))[1],
+            colours = [
+              [200,0,0],
+              [0,200,0],
+              [0,0,200],
+              [255,200,0],
+              [200,0,50],
+              [0,0,255],
+              [255,255,255]
+            ];
+
+          return colours[traced] || [0,0,0];
         }
 
         var wallColour = function(intersection, wallItHit) { // <- intersection can be removed if global
           // calculate vector towards light
           var toLight = lightPosition.subtract(intersection),
             sphereHit = trace(toLight.unit(), intersection)[1] > 4;
-
           return colFuncArray[wallItHit].colour.scale(1 + 0.5*!sphereHit);
         }
         
@@ -234,7 +248,9 @@
 
           if (object < 5)
             return wallColour(intersection, object);
-          return sphereColour(intersection);
+          if (object == -1)
+            return [0,0,0];
+          return sphereColour(direction, intersection, object);
         }
 
         W = imgData.width;
@@ -251,7 +267,6 @@
         floor = wallColGenerator([0,1,0], [0,1.49*W,0]);
         ceiling = wallColGenerator([0,1,0], [0,-1.49*W,0]);
         backWall = wallColGenerator([0,0,1], [0,0,11.99*W], [0,0,100]);
-        console.log(leftWall.colour);
 
         colFuncArray = [backWall, ceiling, floor, rightWall, leftWall, sphere2, sphere1];
         L = W * H * 4;
