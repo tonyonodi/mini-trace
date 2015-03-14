@@ -124,13 +124,8 @@
           add=function(t,x){return[t[0]+x[0],t[1]+x[1],t[2]+x[2]]};scale=function(t,x){return[t[0]*x,t[1]*x,t[2]*x]};subtract=function(t,x){return add(t,scale(x,-1))};dot=function(t,x){return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]};cross=function(t,x){return[t[1]*x[2]-t[2]*x[y],t[2]*x[0]-t[0]*x[2],t[0]*x[1]-t[1]*x[0]]};magnitude=function(t){return(S=Math.sqrt)(t[0]*t[0]+t[1]*t[1]+t[2]*t[2])};unit=function(t){return scale(t,1/magnitude(t))};
           K = function(centre) {
             return function(line) {
-              osubc = subtract(O,centre);
-              loc = dot(line,osubc);
-              d = -loc - S(loc*loc - magnitude(osubc)*magnitude(osubc) + w*w); // w is the sphere's radius
-              intersection = add(O,scale(line,d));
-              normal = unit(subtract(centre, intersection));
-              if (!isNaN(d)||d>0) // ray misses sphere or sphere is behind origin
-                return [intersection, normal];
+              if (!isNaN(d=-(loc=dot(line,(osubc=subtract(O,centre)))) - S(loc*loc - magnitude(osubc)*magnitude(osubc) + w*w))||d>0)
+                return [(intersection=add(O,scale(line,d))), unit(subtract(centre, intersection))];
             }
           }
           J = function(normal, pointOnPlane) {
