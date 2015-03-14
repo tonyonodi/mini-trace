@@ -117,26 +117,26 @@
         var TOKEN_RELOAD_ONORIENTATIONCHANGE = true;
       </script>
       <script type="demo">
-      counter = 0;
+      C = 0;
       draw = function() {
-          data=(imgData=c.getImageData(0,0,a.width,a.height)).data;
+          data=(I=c.getImageData(0,0,a.width,a.height)).data;
           // a=function(t,x){return[t[0]+x[0],t[1]+x[1],t[2]+x[2]]};s=function(t,x){return[t[0]*x,t[1]*x,t[2]*x]};m=function(t,x){return a(t,s(x,-1))};d=function(t,x){return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]};c=function(t,x){return[t[1]*x[2]-t[2]*x[y],t[2]*x[0]-t[0]*x[2],t[0]*x[1]-t[1]*x[0]]};M=function(t){return(S=Math.sqrt)(t[0]*t[0]+t[1]*t[1]+t[2]*t[2])};u=function(t){return s(t,1/m(t))};
           add=function(t,x){return[t[0]+x[0],t[1]+x[1],t[2]+x[2]]};scale=function(t,x){return[t[0]*x,t[1]*x,t[2]*x]};subtract=function(t,x){return add(t,scale(x,-1))};dot=function(t,x){return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]};cross=function(t,x){return[t[1]*x[2]-t[2]*x[y],t[2]*x[0]-t[0]*x[2],t[0]*x[1]-t[1]*x[0]]};magnitude=function(t){return(S=Math.sqrt)(t[0]*t[0]+t[1]*t[1]+t[2]*t[2])};unit=function(t){return scale(t,1/magnitude(t))};
           K = function(centre) {
             return function(line) {
               if (!isNaN(d=-(loc=dot(line,(osubc=subtract(O,centre)))) - S(loc*loc - magnitude(osubc)*magnitude(osubc) + w*w))||d>0)
-                return [(intersection=add(O,scale(line,d))), unit(subtract(centre, intersection))];
+                return [(F=add(O,scale(line,d))), unit(subtract(centre, F))];
             }
           }
           J = function(normal, pointOnPlane) {
             return function(line) {
               if ((d=dot(subtract(pointOnPlane,O),normal)/dot(line,normal)) > 0)
-                if (-1.5*W < (intersection = add(O,scale(line,d)))[1] && 1.5*W > intersection[1] && intersection[2] < 12*W)
-                  return [intersection, normal];
+                if (-1.5*W < (F = add(O,scale(line,d)))[1] && 1.5*W > F[1] && F[2] < 12*W)
+                  return [F, normal];
             }
           }
-          W = imgData.width;
-          H = imgData.height;
+          W = I.width;
+          H = I.height;
           w = W/2;
           h = H/2;
           O = [0,0,0];
@@ -146,9 +146,8 @@
             x=i/4%W;y=0|i/4/H;
             direction = unit([x-w,-h*y/w+h,2*W]);
             for (var j = E.length - 1; j>=0; j -= 1) {
-              intersectionData = E[j](direction);
-              if (intersectionData) {
-                newPixel = scale([255,255,255], dot(unit(subtract(intersectionData[0], [0,Math.sin(counter)*W,9*W])), intersectionData[1]));
+              if (Y=E[j](direction)) {
+                newPixel = scale([255,255,255], dot(unit(subtract(Y[0], [0,Math.sin(C)*W,9*W])), Y[1]));
                 break;
               }
             }
@@ -157,8 +156,8 @@
             data[i + 2] = newPixel[2];
             data[i + 3] = 255;
           }
-          counter += 0.1;
-          c.putImageData(imgData, 0, 0);
+          C += 0.1;
+          c.putImageData(I, 0, 0);
           window.requestAnimationFrame(draw);
         }
         draw()
