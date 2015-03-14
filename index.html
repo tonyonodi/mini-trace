@@ -119,19 +119,19 @@
       <script type="demo">
       C = 0;
       draw = function() {
-          data=(I=c.getImageData(0,0,a.width,a.height)).data;
+          D=(I=c.getImageData(0,0,a.width,a.height)).data;
           // a=function(t,x){return[t[0]+x[0],t[1]+x[1],t[2]+x[2]]};s=function(t,x){return[t[0]*x,t[1]*x,t[2]*x]};m=function(t,x){return a(t,s(x,-1))};d=function(t,x){return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]};c=function(t,x){return[t[1]*x[2]-t[2]*x[y],t[2]*x[0]-t[0]*x[2],t[0]*x[1]-t[1]*x[0]]};M=function(t){return(S=Math.sqrt)(t[0]*t[0]+t[1]*t[1]+t[2]*t[2])};u=function(t){return s(t,1/m(t))};
-          add=function(t,x){return[t[0]+x[0],t[1]+x[1],t[2]+x[2]]};scale=function(t,x){return[t[0]*x,t[1]*x,t[2]*x]};subtract=function(t,x){return add(t,scale(x,-1))};dot=function(t,x){return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]};cross=function(t,x){return[t[1]*x[2]-t[2]*x[y],t[2]*x[0]-t[0]*x[2],t[0]*x[1]-t[1]*x[0]]};magnitude=function(t){return(S=Math.sqrt)(t[0]*t[0]+t[1]*t[1]+t[2]*t[2])};unit=function(t){return scale(t,1/magnitude(t))};
-          K = function(centre) {
+          A=function(t,x){return[t[0]+x[0],t[1]+x[1],t[2]+x[2]]};s=function(t,x){return[t[0]*x,t[1]*x,t[2]*x]};m=function(t,x){return A(t,s(x,-1))};T=function(t,x){return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]};M=function(t){return(S=Math.sqrt)(t[0]*t[0]+t[1]*t[1]+t[2]*t[2])};u=function(t){return s(t,1/M(t))};
+          K = function(Q) {
             return function(line) {
-              if (!isNaN(d=-(loc=dot(line,(osubc=subtract(O,centre)))) - S(loc*loc - magnitude(osubc)*magnitude(osubc) + w*w))||d>0)
-                return [(F=add(O,scale(line,d))), unit(subtract(centre, F))];
+              if (!isNaN(d=-(loc=T(line,(osubc=m(O,Q)))) - S(loc*loc - M(osubc)*M(osubc) + w*w))||d>0)
+                return [(F=A(O,s(line,d))), u(m(Q, F))];
             }
           }
           J = function(normal, pointOnPlane) {
             return function(line) {
-              if ((d=dot(subtract(pointOnPlane,O),normal)/dot(line,normal)) > 0)
-                if (-1.5*W < (F = add(O,scale(line,d)))[1] && 1.5*W > F[1] && F[2] < 12*W)
+              if ((d=T(m(pointOnPlane,O),normal)/T(line,normal)) > 0)
+                if (-1.5*W < (F = A(O,s(line,d)))[1] && 1.5*W > F[1] && F[2] < 12*W)
                   return [F, normal];
             }
           }
@@ -144,17 +144,17 @@
           L = W * H * 4;
           for (var i = 0; i < L; i+=4) {
             x=i/4%W;y=0|i/4/H;
-            direction = unit([x-w,-h*y/w+h,2*W]);
+            U = u([x-w,-h*y/w+h,2*W]);
             for (var j = E.length - 1; j>=0; j -= 1) {
-              if (Y=E[j](direction)) {
-                newPixel = scale([255,255,255], dot(unit(subtract(Y[0], [0,Math.sin(C)*W,9*W])), Y[1]));
+              if (Y=E[j](U)) {
+                P = s([255,255,255], T(u(m(Y[0], [0,Math.sin(C)*W,9*W])), Y[1]));
                 break;
               }
             }
-            data[i] = newPixel[0];
-            data[i + 1] = newPixel[1];
-            data[i + 2] = newPixel[2];
-            data[i + 3] = 255;
+            D[i] = P[0];
+            D[i + 1] = P[1];
+            D[i + 2] = P[2];
+            D[i + 3] = 255;
           }
           C += 0.1;
           c.putImageData(I, 0, 0);
