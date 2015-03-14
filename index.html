@@ -180,7 +180,7 @@
         var sphereColour = function(direction, intersection, sphereItHit) { // <- intersection can be removed if global
           var normal = unit(subtract(intersection, colFuncArray[sphereItHit].centre)),
             reflection = subtract(direction, scale( normal, 2*dot(direction, normal) ) ),
-            traced = trace(reflection, intersection)[1],
+            traced = trace(reflection, intersection, [5,6])[1],
             colours = [
               [200,0,0],
               [0,200,0],
@@ -196,17 +196,18 @@
 
         var wallColour = function(intersection, wallItHit) { // <- intersection can be removed if global
           // calculate vector towards light
-          var toLight = subtract(lightPosition, intersection),
-            sphereHit = trace(unit(toLight), intersection)[1] > 4;
+          var toLight = subtract(lightPosition, intersection);
+          var sphereHit = trace(unit(toLight), intersection, [])[1] > 4;
           return scale(colFuncArray[wallItHit].colour, 1 + 0.5*!sphereHit);
         }
         
         // return [intersection, object] where object is given by:
         // -1 => behindCamera, 0 => backWall, 1 => ceiling, 2 => floor, 3 => rightWall, 4 => leftWall, 5 => sphere2, 6 => sphere1
-        var trace = function(direction, point) {
+        var trace = function(direction, point, exclude) {
           for (var i = colFuncArray.length - 1; i>=0; i -= 1) {
             var intersection = colFuncArray[i](direction,point); // <- set intersecition as global var and there's no need to return it *vomit*
-            if (intersection) {
+
+            if (intersection && !~exclude.indexOf(i)) {
               return [intersection, i]
             }
           }
@@ -214,7 +215,7 @@
         }
 
         var sample = function(direction, point) {
-          var traced = trace(direction, point),
+          var traced = trace(direction, point, []),
             intersection = traced[0],
             object = traced[1];
 
