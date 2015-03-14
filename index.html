@@ -144,11 +144,7 @@
             }
           }
           blinnPhong = function(direction, inputArray) {
-            intersection = inputArray[0];
-            normal = inputArray[1];
-            toLight = unit(subtract(intersection, [0,Math.sin(counter)*W,9*W]));
-            diffuseComponent = dot(toLight, normal);
-            return scale([255,255,255], diffuseComponent);
+            return scale([255,255,255], dot(unit(subtract(inputArray[0], [0,Math.sin(counter)*W,9*W])), inputArray[1]));
           }
           W = imgData.width;
           H = imgData.height;
