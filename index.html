@@ -123,46 +123,22 @@
             newPixel,
             x,
             y;
-        
-        // compressed version of vector methods      
-        // A=Array.prototype;S=Math.sqrt;A.a=function(x){t=this;return [t[0]+x[0],t[1]+x[1],t[2]+x[2]]}A.s=function(x){t=this;return [t[0]*x,t[1]*x,t[2]*x]}A.d=function(x){t=this;return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]}A.c=function(x){t=this;return [t[1]*x[2]-t[2]*x[y],t[2]*x[0]-t[0]*x[2],t[0]*x[1]-t[1]*x[0]]}A.m=function(){t=this;return S(t[0]*t[0]+t[1]*t[1]+t[2]*t[2])}A.u=function(){t=this;return t.s(1/t.m())}
 
-        // Extend array prototype with some vector operations
-        A = Array.prototype;
-        S = Math.sqrt;
+        // minified, compresses to 275 bytes:
+        // a=function(t,x){return[t[0]+x[0],t[1]+x[1],t[2]+x[2]]};s=function(t,x){return[t[0]*x,t[1]*x,t[2]*x]};m=function(t,x){return a(t,s(x,-1))};d=function(t,x){return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]};c=function(t,x){return[t[1]*x[2]-t[2]*x[y],t[2]*x[0]-t[0]*x[2],t[0]*x[1]-t[1]*x[0]]};M=function(t){return(S=Math.sqrt)(t[0]*t[0]+t[1]*t[1]+t[2]*t[2])};u=function(t){return s(t,1/m(t))};
+        add=function(t,x){return[t[0]+x[0],t[1]+x[1],t[2]+x[2]]}
 
-        A.add = function(x) {
-          t=this;
-          return [t[0]+x[0],t[1]+x[1],t[2]+x[2]]
-        }
+        scale=function(t,x){return[t[0]*x,t[1]*x,t[2]*x]}
 
-        A.scale = function(x) {
-          t=this;
-          return [t[0]*x,t[1]*x,t[2]*x]
-        }
+        subtract=function(t,x){return add(t,scale(x,-1))}
 
-        A.subtract = function(x) {
-          return this.add(x.scale(-1))
-        }
+        dot=function(t,x){return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]}
 
-        A.dot = function(x) {
-          t=this;
-          return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]
-        }
+        cross=function(t,x){return[t[1]*x[2]-t[2]*x[y],t[2]*x[0]-t[0]*x[2],t[0]*x[1]-t[1]*x[0]]}
 
-        A.cross = function(x) {
-          t=this;
-          return [t[1]*x[2]-t[2]*x[y], t[2]*x[0]-t[0]*x[2], t[0]*x[1]-t[1]*x[0]];
-        }
+        magnitude=function(t){return(S=Math.sqrt)(t[0]*t[0]+t[1]*t[1]+t[2]*t[2])}
 
-        A.magnitude = function() { 
-          t=this;
-          return S(t[0]*t[0]+t[1]*t[1]+t[2]*t[2]);
-        }
-
-        A.unit = function() {
-          t=this;return t.scale(1/t.magnitude());
-        }
+        unit=function(t){return scale(t,1/magnitude(t))}
 
         // Camera at O
         // Image plane at [0, 0, image.width] (i.e. focal length = image width)
@@ -173,10 +149,10 @@
           // return intersection distance if hit
           var spherefunc = function(line, point) {
             var r = w,
-              osubc = point.subtract(centre),
-              loc = line.dot(osubc),
-              d = loc - Math.sqrt(loc*loc - osubc.magnitude()*osubc.magnitude() + r*r),
-              intersection = point.add(line.scale(d));
+              osubc = subtract(point,centre),
+              loc = dot(line,osubc),
+              d = loc - Math.sqrt(loc*loc - magnitude(osubc)*magnitude(osubc) + r*r),
+              intersection = add(point,scale(line,d));
 
             if (!isNaN(d)||d>0) // ray misses sphere or sphere is behind origin
               return intersection
@@ -193,10 +169,10 @@
         // return wall collision detection func
         var wallColGenerator = function(normal, pointOnPlane, colour) {
           var wallfunc = function(line, point) {
-            var d = pointOnPlane.subtract(point).dot(normal) / line.dot(normal);
+            var d = dot(subtract(pointOnPlane,point),normal) / dot(line,normal);
 
             if (d > 0) {
-              var intersection = point.add(line.scale(d));
+              var intersection = add(point,scale(line,d));
               if (-1.5*W < intersection[1] && 1.5*W > intersection[1] && intersection[2] < 12*W)
                 return intersection;
             }
@@ -205,10 +181,10 @@
           return wallfunc;
         }
 
-        var sphereColour = function(direction, intersection, sphereItHit) { // <- intersection can be removed if global
-          var normal =  intersection.subtract(colFuncArray[sphereItHit].centre).unit(),
-            reflection = direction.subtract(normal.scale(2*direction.dot(normal))),
-            traced = trace(reflection, intersection.add(normal.scale(10)))[1],
+        sphereColour = function(direction, intersection, sphereItHit) { // <- intersection can be removed if global
+          var normal = unit(subtract(intersection, colFuncArray[sphereItHit].centre)),
+            reflection = subtract(direction, scale(normal, dot(2*direction, normal))),
+            traced = trace(reflection, add(intersection, scale(normal, 10)))[1],
             colours = [
               [200,0,0],
               [0,200,0],
@@ -224,9 +200,9 @@
 
         var wallColour = function(intersection, wallItHit) { // <- intersection can be removed if global
           // calculate vector towards light
-          var toLight = lightPosition.subtract(intersection),
-            sphereHit = trace(toLight.unit(), intersection)[1] > 4;
-          return colFuncArray[wallItHit].colour.scale(1 + 0.5*!sphereHit);
+          var toLight = subtract(lightPosition, intersection),
+            sphereHit = trace(unit(toLight), intersection)[1] > 4;
+          return scale(colFuncArray[wallItHit].colour, 1 + 0.5*!sphereHit);
         }
         
         // return [intersection, object] where object is given by:
@@ -275,8 +251,8 @@
         for (var i = 0; i < L; i+=4) {
           var pixel = i/4;
           x = pixel % W;
-          y = Math.floor(pixel / H);
-          rayDir = [x-w,-h*y/w+h,2*W].unit();
+          y = 0|pixel/H;
+          rayDir = unit([x-w,-h*y/w+h,2*W]);
 
           newPixel = sample(rayDir, O);
         
