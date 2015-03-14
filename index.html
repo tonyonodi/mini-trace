@@ -164,11 +164,12 @@
         
         // return [intersection, object] where object is given by:
         // -1 => behindCamera, 0 => backWall, 1 => ceiling, 2 => floor, 3 => rightWall, 4 => leftWall, 5 => sphere2, 6 => sphere1
-        var sample = function(direction) {
+        var sample = function() {
           for (var i = colFuncArray.length - 1; i>=0; i -= 1) {
             var intersectionData = colFuncArray[i](direction);
             if (intersectionData) {
-              return blinnPhong(direction, intersectionData);
+              newPixel = blinnPhong(direction, intersectionData);
+              break;
             }
           }  
         }
@@ -194,12 +195,10 @@
 
         // loop over pixels
         for (var i = 0; i < L; i+=4) {
-          var pixel = i/4;
-          x = pixel % W;
-          y = 0|pixel/H;
-          rayDir = unit([x-w,-h*y/w+h,2*W]);
+          x=i/4%W;y=0|i/4/H;
+          direction = unit([x-w,-h*y/w+h,2*W]);
 
-          newPixel = sample(rayDir, O);
+          sample();
         
           data[i] = newPixel[0];
           data[i + 1] = newPixel[1];
