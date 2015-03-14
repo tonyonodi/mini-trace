@@ -149,17 +149,7 @@
             colour = inputArray[1],
             normal = inputArray[2],
             specularMultiplier = inputArray[3];
-
           return colour;
-        }
-        sample = function() {
-          for (var i = colFuncArray.length - 1; i>=0; i -= 1) {
-            var intersectionData = colFuncArray[i](direction);
-            if (intersectionData) {
-              newPixel = blinnPhong(direction, intersectionData);
-              break;
-            }
-          }
         }
         W = imgData.width;
         H = imgData.height;
@@ -182,7 +172,13 @@
         for (var i = 0; i < L; i+=4) {
           x=i/4%W;y=0|i/4/H;
           direction = unit([x-w,-h*y/w+h,2*W]);
-          sample();
+          for (var j = colFuncArray.length - 1; j>=0; j -= 1) {
+            var intersectionData = colFuncArray[j](direction);
+            if (intersectionData) {
+              newPixel = blinnPhong(direction, intersectionData);
+              break;
+            }
+          }
           data[i] = newPixel[0];
           data[i + 1] = newPixel[1];
           data[i + 2] = newPixel[2];
