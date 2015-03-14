@@ -130,7 +130,7 @@
               intersection = add(O,scale(line,d));
               normal = unit(subtract(centre, intersection));
               if (!isNaN(d)||d>0) // ray misses sphere or sphere is behind origin
-                return [intersection, normal, 50, isSphere=1];
+                return [intersection, normal];
             }
           }
           J = function(normal, pointOnPlane) {
@@ -139,14 +139,13 @@
               if (d > 0) {
                 var intersection = add(O,scale(line,d));
                 if (-1.5*W < intersection[1] && 1.5*W > intersection[1] && intersection[2] < 12*W)
-                  return [intersection, normal, 0, isSphere=0];
+                  return [intersection, normal];
               }
             }
           }
           blinnPhong = function(direction, inputArray) {
             intersection = inputArray[0];
             normal = inputArray[1];
-            specularMultiplier = inputArray[2];
             toLight = unit(subtract(intersection, [0,Math.sin(counter)*W,9*W]));
             diffuseComponent = dot(toLight, normal);
             return scale([255,255,255], diffuseComponent);
