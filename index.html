@@ -124,9 +124,9 @@
           return function(line) {
             var osubc = subtract(O,centre),
               loc = dot(line,osubc),
-              d = loc - S(loc*loc - magnitude(osubc)*magnitude(osubc) + w*w), // w is the sphere's radius
+              d = -loc - S(loc*loc - magnitude(osubc)*magnitude(osubc) + w*w), // w is the sphere's radius
               intersection = add(O,scale(line,d)),
-              normal = unit(subtract(intersection, centre));
+              normal = unit(subtract(centre, intersection));
             if (!isNaN(d)||d>0) // ray misses sphere or sphere is behind origin
               return [intersection, [0,0,255], normal, 50, isSphere=1]
           }
@@ -148,8 +148,6 @@
             specularMultiplier = inputArray[3],
             toLight = unit(subtract(intersection, lightPosition));
           diffuseComponent = dot(toLight, normal);
-          if(isSphere && Math.random() < 0.01)
-            console.log(toLight, normal);
           return scale([255,255,255], diffuseComponent);
         }
         W = imgData.width;
@@ -157,7 +155,7 @@
         w = W/2;
         h = H/2;
         O = [0,0,0];
-        lightPosition = [100*W,0,9*W];
+        lightPosition = [0,W,9*W];
         sphere1 = sphereColGenerator([-1*W,-1*W,9*W]);
         sphere2 = sphereColGenerator([1.5*W,-1*W,10*W]);
         leftWall = wallColGenerator([1,0,0], [-2*W,0,0], [0,100,0]);
