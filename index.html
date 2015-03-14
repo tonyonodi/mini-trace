@@ -143,9 +143,6 @@
               }
             }
           }
-          blinnPhong = function(direction, inputArray) {
-            return scale([255,255,255], dot(unit(subtract(inputArray[0], [0,Math.sin(counter)*W,9*W])), inputArray[1]));
-          }
           W = imgData.width;
           H = imgData.height;
           w = W/2;
@@ -159,7 +156,7 @@
             for (var j = colFuncArray.length - 1; j>=0; j -= 1) {
               intersectionData = colFuncArray[j](direction);
               if (intersectionData) {
-                newPixel = blinnPhong(direction, intersectionData);
+                newPixel = scale([255,255,255], dot(unit(subtract(intersectionData[0], [0,Math.sin(counter)*W,9*W])), intersectionData[1]));
                 break;
               }
             }
