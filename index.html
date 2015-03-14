@@ -181,10 +181,10 @@
           return wallfunc;
         }
 
-        sphereColour = function(direction, intersection, sphereItHit) { // <- intersection can be removed if global
+        var sphereColour = function(direction, intersection, sphereItHit) { // <- intersection can be removed if global
           var normal = unit(subtract(intersection, colFuncArray[sphereItHit].centre)),
-            reflection = subtract(direction, scale(normal, dot(2*direction, normal))),
-            traced = trace(reflection, add(intersection, scale(normal, 10)))[1],
+            reflection = subtract(direction, scale( normal ,2*dot(direction, normal) ) ),
+            traced = trace(reflection, intersection)[1],
             colours = [
               [200,0,0],
               [0,200,0],
