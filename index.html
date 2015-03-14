@@ -123,27 +123,20 @@
         // minified, compresses to 275 bytes:
         // a=function(t,x){return[t[0]+x[0],t[1]+x[1],t[2]+x[2]]};s=function(t,x){return[t[0]*x,t[1]*x,t[2]*x]};m=function(t,x){return a(t,s(x,-1))};d=function(t,x){return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]};c=function(t,x){return[t[1]*x[2]-t[2]*x[y],t[2]*x[0]-t[0]*x[2],t[0]*x[1]-t[1]*x[0]]};M=function(t){return(S=Math.sqrt)(t[0]*t[0]+t[1]*t[1]+t[2]*t[2])};u=function(t){return s(t,1/m(t))};
         add=function(t,x){return[t[0]+x[0],t[1]+x[1],t[2]+x[2]]};scale=function(t,x){return[t[0]*x,t[1]*x,t[2]*x]};subtract=function(t,x){return add(t,scale(x,-1))};dot=function(t,x){return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]};cross=function(t,x){return[t[1]*x[2]-t[2]*x[y],t[2]*x[0]-t[0]*x[2],t[0]*x[1]-t[1]*x[0]]};magnitude=function(t){return(S=Math.sqrt)(t[0]*t[0]+t[1]*t[1]+t[2]*t[2])};unit=function(t){return scale(t,1/magnitude(t))};
-
-        // return sphere collision detection func
         sphereColGenerator = function(centre) {
-          // return intersection distance if hit
           return function(line) {
             var osubc = subtract(O,centre),
               loc = dot(line,osubc),
               d = loc - S(loc*loc - magnitude(osubc)*magnitude(osubc) + w*w), // w is the sphere's radius
               intersection = add(O,scale(line,d)),
               normal = unit(subtract(intersection, centre));
-
             if (!isNaN(d)||d>0) // ray misses sphere or sphere is behind origin
               return [intersection, [0,0,255], normal, 50]
           }
         }
-
-        // return wall collision detection func
         wallColGenerator = function(normal, pointOnPlane, colour) {
           return function(line) {
             var d = dot(subtract(pointOnPlane,O),normal) / dot(line,normal);
-
             if (d > 0) {
               var intersection = add(O,scale(line,d));
               if (-1.5*W < intersection[1] && 1.5*W > intersection[1] && intersection[2] < 12*W)
@@ -151,7 +144,6 @@
             }
           }
         }
-
         blinnPhong = function(direction, inputArray) {
           var intersection = inputArray[0],
             colour = inputArray[1],
@@ -160,7 +152,6 @@
 
           return colour;
         }
-        
         sample = function() {
           for (var i = colFuncArray.length - 1; i>=0; i -= 1) {
             var intersectionData = colFuncArray[i](direction);
@@ -170,7 +161,6 @@
             }
           }
         }
-
         W = imgData.width;
         H = imgData.height;
         w = W/2;
@@ -185,25 +175,20 @@
         floor = wallColGenerator([0,1,0], [0,1.49*W,0]);
         ceiling = wallColGenerator([0,-1,0], [0,-1.49*W,0]);
         backWall = wallColGenerator([0,0,-1], [0,0,11.99*W], [0,0,100]);
-
         colFuncArray = [backWall, ceiling, floor, rightWall, leftWall, sphere2, sphere1]; 
 
         L = W * H * 4;
-
         // loop over pixels
         for (var i = 0; i < L; i+=4) {
           x=i/4%W;y=0|i/4/H;
           direction = unit([x-w,-h*y/w+h,2*W]);
-
           sample();
-        
           data[i] = newPixel[0];
           data[i + 1] = newPixel[1];
           data[i + 2] = newPixel[2];
           data[i + 3] = 255;
         }
         c.putImageData(imgData, 0, 0);
-
       </script>
       <script>
         (function(){var doc=document;var header=doc.getElementsByTagName("header")[0];var firstChild=header.firstChild;var p=doc.getElementsByClassName("p")[0];var n=doc.getElementsByClassName("n")[0];header.insertBefore(p,firstChild);header.insertBefore(n,firstChild);header.appendChild(doc.getElementsByTagName("p")[0])})();
