@@ -122,83 +122,35 @@
 
         // minified, compresses to 275 bytes:
         // a=function(t,x){return[t[0]+x[0],t[1]+x[1],t[2]+x[2]]};s=function(t,x){return[t[0]*x,t[1]*x,t[2]*x]};m=function(t,x){return a(t,s(x,-1))};d=function(t,x){return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]};c=function(t,x){return[t[1]*x[2]-t[2]*x[y],t[2]*x[0]-t[0]*x[2],t[0]*x[1]-t[1]*x[0]]};M=function(t){return(S=Math.sqrt)(t[0]*t[0]+t[1]*t[1]+t[2]*t[2])};u=function(t){return s(t,1/m(t))};
-        add=function(t,x){return[t[0]+x[0],t[1]+x[1],t[2]+x[2]]}
-
-        scale=function(t,x){return[t[0]*x,t[1]*x,t[2]*x]}
-
-        subtract=function(t,x){return add(t,scale(x,-1))}
-
-        dot=function(t,x){return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]}
-
-        cross=function(t,x){return[t[1]*x[2]-t[2]*x[y],t[2]*x[0]-t[0]*x[2],t[0]*x[1]-t[1]*x[0]]}
-
-        magnitude=function(t){return(S=Math.sqrt)(t[0]*t[0]+t[1]*t[1]+t[2]*t[2])}
-
-        unit=function(t){return scale(t,1/magnitude(t))}
-
-        // Camera at O
-        // Image plane at [0, 0, image.width] (i.e. focal length = image width)
-        // => vector for a ray at pixel (x,y) will be [x, y, image.width]
+        add=function(t,x){return[t[0]+x[0],t[1]+x[1],t[2]+x[2]]};scale=function(t,x){return[t[0]*x,t[1]*x,t[2]*x]};subtract=function(t,x){return add(t,scale(x,-1))};dot=function(t,x){return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]};cross=function(t,x){return[t[1]*x[2]-t[2]*x[y],t[2]*x[0]-t[0]*x[2],t[0]*x[1]-t[1]*x[0]]};magnitude=function(t){return(S=Math.sqrt)(t[0]*t[0]+t[1]*t[1]+t[2]*t[2])};unit=function(t){return scale(t,1/magnitude(t))};
 
         // return sphere collision detection func
         var sphereColGenerator = function(centre) {
           // return intersection distance if hit
-          var spherefunc = function(line, point) {
+          return function(line, point) {
             var r = w,
               osubc = subtract(point,centre),
               loc = dot(line,osubc),
               d = loc - Math.sqrt(loc*loc - magnitude(osubc)*magnitude(osubc) + r*r),
-              intersection = add(point,scale(line,d));
+              intersection = add(point,scale(line,d)),
+              normal = unit(subtract(intersection, centre));
 
             if (!isNaN(d)||d>0) // ray misses sphere or sphere is behind origin
-              return intersection
+              return [intersection, [0,0,255], normal, 50]
           }
-          spherefunc.centre = centre;
-          return spherefunc
         }
-
-        // line plane intersection
-        // d=(p0-l0).n/(l.n)
-        // intersects at: dl+l0
-        // l0 = [0,0,0];
 
         // return wall collision detection func
         var wallColGenerator = function(normal, pointOnPlane, colour) {
-          var wallfunc = function(line, point) {
+          return function(line, point) {
             var d = dot(subtract(pointOnPlane,point),normal) / dot(line,normal);
 
             if (d > 0) {
               var intersection = add(point,scale(line,d));
               if (-1.5*W < intersection[1] && 1.5*W > intersection[1] && intersection[2] < 12*W)
-                return intersection;
+                return [intersection, colour || [100,100,100], normal, undefined];
             }
           }
-          wallfunc.colour = colour || [100,100,100];
-          return wallfunc;
-        }
-
-        var sphereColour = function(direction, intersection, sphereItHit) { // <- intersection can be removed if global
-          var normal = unit(subtract(intersection, colFuncArray[sphereItHit].centre)),
-            reflection = subtract(direction, scale( normal, 2*dot(direction, normal) ) ),
-            traced = trace(reflection, intersection, [5,6])[1],
-            colours = [
-              [200,0,0],
-              [0,200,0],
-              [0,0,200],
-              [255,200,0],
-              [200,0,50],
-              [0,0,255],
-              [255,255,255]
-            ];
-
-          return colours[traced] || [0,0,0];
-        }
-
-        var wallColour = function(intersection, wallItHit) { // <- intersection can be removed if global
-          // calculate vector towards light
-          var toLight = subtract(lightPosition, intersection);
-          var sphereHit = trace(unit(toLight), intersection, [])[1] > 4;
-          return scale(colFuncArray[wallItHit].colour, 1 + 0.5*!sphereHit);
         }
         
         // return [intersection, object] where object is given by:
