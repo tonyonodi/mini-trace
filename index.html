@@ -130,12 +130,9 @@
           }
           J = function(normal, pointOnPlane) {
             return function(line) {
-              var d = dot(subtract(pointOnPlane,O),normal) / dot(line,normal);
-              if (d > 0) {
-                var intersection = add(O,scale(line,d));
-                if (-1.5*W < intersection[1] && 1.5*W > intersection[1] && intersection[2] < 12*W)
+              if ((d=dot(subtract(pointOnPlane,O),normal)/dot(line,normal)) > 0)
+                if (-1.5*W < (intersection = add(O,scale(line,d)))[1] && 1.5*W > intersection[1] && intersection[2] < 12*W)
                   return [intersection, normal];
-              }
             }
           }
           W = imgData.width;
