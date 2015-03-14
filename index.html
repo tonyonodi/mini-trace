@@ -118,11 +118,7 @@
       </script>
       <script type="demo">
         // console.log('demo here', window.a, b, window.c, window.g);
-        var imgData = c.getImageData(0, 0, a.width, a.height),
-            data = imgData.data,
-            newPixel,
-            x,
-            y;
+        data=(imgData=c.getImageData(0,0,a.width,a.height)).data;
 
         // minified, compresses to 275 bytes:
         // a=function(t,x){return[t[0]+x[0],t[1]+x[1],t[2]+x[2]]};s=function(t,x){return[t[0]*x,t[1]*x,t[2]*x]};m=function(t,x){return a(t,s(x,-1))};d=function(t,x){return t[0]*x[0]+t[1]*x[1]+t[2]*x[2]};c=function(t,x){return[t[1]*x[2]-t[2]*x[y],t[2]*x[0]-t[0]*x[2],t[0]*x[1]-t[1]*x[0]]};M=function(t){return(S=Math.sqrt)(t[0]*t[0]+t[1]*t[1]+t[2]*t[2])};u=function(t){return s(t,1/m(t))};
@@ -183,7 +179,7 @@
 
         var sphereColour = function(direction, intersection, sphereItHit) { // <- intersection can be removed if global
           var normal = unit(subtract(intersection, colFuncArray[sphereItHit].centre)),
-            reflection = subtract(direction, scale( normal ,2*dot(direction, normal) ) ),
+            reflection = subtract(direction, scale( normal, 2*dot(direction, normal) ) ),
             traced = trace(reflection, intersection)[1],
             colours = [
               [200,0,0],
