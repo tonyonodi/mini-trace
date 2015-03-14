@@ -127,12 +127,12 @@
         // return sphere collision detection func
         var sphereColGenerator = function(centre) {
           // return intersection distance if hit
-          return function(line, point) {
+          return function(line) {
             var r = w,
-              osubc = subtract(point,centre),
+              osubc = subtract(O,centre),
               loc = dot(line,osubc),
               d = loc - Math.sqrt(loc*loc - magnitude(osubc)*magnitude(osubc) + r*r),
-              intersection = add(point,scale(line,d)),
+              intersection = add(O,scale(line,d)),
               normal = unit(subtract(intersection, centre));
 
             if (!isNaN(d)||d>0) // ray misses sphere or sphere is behind origin
@@ -142,11 +142,11 @@
 
         // return wall collision detection func
         var wallColGenerator = function(normal, pointOnPlane, colour) {
-          return function(line, point) {
-            var d = dot(subtract(pointOnPlane,point),normal) / dot(line,normal);
+          return function(line) {
+            var d = dot(subtract(pointOnPlane,O),normal) / dot(line,normal);
 
             if (d > 0) {
-              var intersection = add(point,scale(line,d));
+              var intersection = add(O,scale(line,d));
               if (-1.5*W < intersection[1] && 1.5*W > intersection[1] && intersection[2] < 12*W)
                 return [intersection, colour || [100,100,100], normal, 0];
             }
@@ -164,9 +164,9 @@
         
         // return [intersection, object] where object is given by:
         // -1 => behindCamera, 0 => backWall, 1 => ceiling, 2 => floor, 3 => rightWall, 4 => leftWall, 5 => sphere2, 6 => sphere1
-        var sample = function(direction, point) {
+        var sample = function(direction) {
           for (var i = colFuncArray.length - 1; i>=0; i -= 1) {
-            var intersectionData = colFuncArray[i](direction,point);
+            var intersectionData = colFuncArray[i](direction);
             if (intersectionData) {
               return blinnPhong(direction, intersectionData);
             }
